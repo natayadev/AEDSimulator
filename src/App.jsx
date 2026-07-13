@@ -401,7 +401,7 @@ export function AEDSimulator() {
 
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           {/* Panel izquierdo: Guía de RCP (bloque teal) */}
-          <div className="lg:col-span-3 flex flex-col gap-4 h-full">
+          <div className="lg:col-span-4 flex flex-col gap-4 h-full">
             {state.step === STEPS.CPR ? (
               <motion.aside
                 initial={{ x: -20, opacity: 0 }}
@@ -446,7 +446,7 @@ export function AEDSimulator() {
           </div>
 
           {/* Área central: muñeco */}
-          <div className="lg:col-span-6 flex flex-col h-full">
+          <div className="lg:col-span-4 flex flex-col h-full">
             {state.step === STEPS.CALL_911 ? (
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
@@ -526,7 +526,7 @@ export function AEDSimulator() {
                   </div>
                 </div>
 
-                <div className="relative mx-auto w-full max-w-[300px] select-none flex-1 flex items-center justify-center">
+                <div className="relative mx-auto my-4 w-full max-w-[300px] select-none flex-1 flex items-center justify-center">
                   <img
                     src={patient.img}
                     alt={patient.alt}
@@ -622,7 +622,7 @@ export function AEDSimulator() {
           </div>
 
           {/* Panel derecho: equipo DEA (monitor y controles) */}
-          <div className="lg:col-span-3 flex flex-col gap-4 h-full">
+          <div className="lg:col-span-4 flex flex-col gap-4 h-full">
             <VisualDisplay
               step={state.step}
               message={postShockMessage ?? statusText[state.step]}
