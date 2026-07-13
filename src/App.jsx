@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Baby, CheckCircle2, Hand, HeartPulse, PersonStanding, PhoneCall, Power, RotateCcw, User, Zap } from 'lucide-react'
+import { Baby, CheckCircle2, HeartPulse, PersonStanding, PhoneCall, Power, RotateCcw, User, Zap } from 'lucide-react'
 import { STEPS, INITIAL_STATE, reducer } from './states'
 import { useAudio } from './AudioManager'
 import VisualDisplay from './VisualDisplay'
-import adultoImg from './assets/adulto.jpg'
-import infanteImg from './assets/infante.jpg'
+import adultoImg from './assets/adulto.png'
+import infanteImg from './assets/infante.png'
+import bebeImg from './assets/bebe.png'
+import deaImg from './assets/dea.png'
+import aedSignImg from './assets/aed.png'
+import posicionLateralImg from './assets/posicion-lateral.png'
+import rcpAdultoImg from './assets/rcp-adulto.png'
+import rcpInfanteImg from './assets/rcp-infante.png'
+import rcpBebeImg from './assets/rcp-bebe.png'
 
 const INITIAL_PADS_STATE = {
   left: false,
@@ -24,9 +31,10 @@ const PATIENTS = {
       'Colocá a la persona en posición lateral de seguridad y esperá a los servicios de emergencia.',
     zoneSize: 'w-16 h-16 sm:w-20 sm:h-20',
     zones: {
-      left: { label: 'Esternón', x: '39%', y: '50%' },
-      right: { label: 'Axila', x: '64%', y: '63%' },
+      left: { label: 'Esternón', x: '37%', y: '58%' },
+      right: { label: 'Axila', x: '65%', y: '70%' },
     },
+    cprImg: rcpAdultoImg,
     cprGuide: [
       ['Manos', 'talón de una mano en el centro del pecho, la otra encima y dedos entrecruzados.'],
       ['Frecuencia', '100 a 120 por minuto.'],
@@ -39,17 +47,17 @@ const PATIENTS = {
     label: 'Infante',
     noun: 'el infante',
     icon: PersonStanding,
-    // TODO: reemplazar por una imagen de muñeco infantil cuando esté disponible
-    img: adultoImg,
+    img: infanteImg,
     alt: 'Muñeco de entrenamiento infante',
     touchWarning: 'No tocar a la persona',
     recoveredMsg:
       'Colocá al infante en posición lateral de seguridad y esperá a los servicios de emergencia.',
     zoneSize: 'w-14 h-14 sm:w-16 sm:h-16',
     zones: {
-      left: { label: 'Esternón', x: '39%', y: '50%' },
-      right: { label: 'Axila', x: '64%', y: '63%' },
+      left: { label: 'Esternón', x: '38%', y: '60%' },
+      right: { label: 'Axila', x: '64%', y: '71%' },
     },
+    cprImg: rcpInfanteImg,
     cprGuide: [
       ['Manos', 'una sola mano en el centro del pecho.'],
       ['Frecuencia', '100 a 120 por minuto.'],
@@ -61,16 +69,17 @@ const PATIENTS = {
     label: 'Bebé',
     noun: 'el bebé',
     icon: Baby,
-    img: infanteImg,
+    img: bebeImg,
     alt: 'Muñeco de entrenamiento bebé',
     touchWarning: 'No tocar a la persona',
     recoveredMsg:
       'Colocá al bebé en posición lateral de seguridad, mantenelo abrigado y esperá a los servicios de emergencia.',
     zoneSize: 'w-12 h-12 sm:w-14 sm:h-14',
     zones: {
-      left: { label: 'Pecho', x: '49%', y: '37%' },
-      right: { label: 'Costado', x: '63%', y: '45%' },
+      left: { label: 'Pecho', x: '49%', y: '36%' },
+      right: { label: 'Costado', x: '63%', y: '44%' },
     },
+    cprImg: rcpBebeImg,
     cprGuide: [
       ['Manos', 'dos dedos en el centro del pecho y una mano en la frente.'],
       ['Frecuencia', '100 a 120 por minuto.'],
@@ -349,6 +358,30 @@ export function AEDSimulator() {
       </header>
 
       <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-4 flex flex-col gap-4">
+        {/* Contexto: qué es el DEA */}
+        <section className="bg-white rounded border border-slate-200 shadow-sm p-5">
+          <h2 className="font-condensed font-bold uppercase tracking-wide text-cr-ink pb-2 mb-3 border-b-2 border-cr-red inline-block">
+            📌 ¿Qué es el DEA?
+          </h2>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            El DEA (Desfibrilador Externo Automático) es un dispositivo electrónico portátil que
+            diagnostica y puede ayudar a restablecer el ritmo cardíaco cuando una persona sufre un
+            paro cardíaco. La desfibrilación consiste en emitir un impulso de corriente continua al
+            corazón, para tratar que el mismo retome su ritmo normal.
+          </p>
+          <p className="mt-3 text-[11px] text-slate-400">
+            Fuente:{' '}
+            <a
+              href="https://www.argentina.gob.ar/salud/primerosauxilios/rcp/desfibrilador"
+              target="_blank"
+              rel="noreferrer"
+              className="underline hover:text-cr-red"
+            >
+              Ministerio de Salud — argentina.gob.ar
+            </a>
+          </p>
+        </section>
+
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
           {/* Panel izquierdo: Guía de RCP (bloque teal) */}
           <div className="lg:col-span-3 flex flex-col gap-4">
@@ -358,10 +391,15 @@ export function AEDSimulator() {
                 animate={{ x: 0, opacity: 1 }}
                 className="bg-cr-teal text-white rounded shadow-sm p-5"
               >
-                <h3 className="font-condensed font-bold uppercase tracking-wide flex items-center gap-2 pb-2 mb-4 border-b-2 border-white/40">
-                  <Hand size={18} />
-                  Compresiones: {patient.label}
+                <h3 className="font-condensed font-bold uppercase tracking-wide pb-2 mb-4 border-b-2 border-white/40">
+                  📌 Compresiones: {patient.label}
                 </h3>
+                <img
+                  src={patient.cprImg}
+                  alt={`Técnica de compresiones en ${patient.label.toLowerCase()}`}
+                  className="w-full mb-4"
+                  draggable={false}
+                />
                 <ul className="text-sm space-y-3 leading-relaxed">
                   {patient.cprGuide.map(([term, text]) => (
                     <li key={term}>
@@ -375,13 +413,13 @@ export function AEDSimulator() {
               </motion.aside>
             ) : (
               <aside className="bg-white rounded border border-slate-200 shadow-sm p-5">
-                <h3 className="font-condensed font-bold uppercase tracking-wide text-cr-ink flex items-center gap-2 pb-2 mb-4 border-b-2 border-cr-red">
-                  <HeartPulse size={18} className="text-cr-red" />
-                  ¿Cómo funciona?
+                <h3 className="font-condensed font-bold uppercase tracking-wide text-cr-ink pb-2 mb-4 border-b-2 border-cr-red inline-block">
+                  📌 ¿Cómo funciona?
                 </h3>
                 <ol className="text-sm space-y-3 text-slate-600 leading-relaxed list-decimal list-inside">
                   <li>Verificá que {patient.noun} no responda y no respire.</li>
                   <li>Llamá a emergencias (107 / 911).</li>
+                  <li>Mientras alguien hace RCP, otro prepara el DEA.</li>
                   <li>Encendé el DEA.</li>
                   <li>Quitale la ropa del torso: el pecho debe quedar descubierto y seco.</li>
                   <li>Colocá los parches sobre {patient.noun}.</li>
@@ -437,19 +475,18 @@ export function AEDSimulator() {
                   </h2>
                   <p className="text-white/90 text-sm max-w-sm mx-auto">{patient.recoveredMsg}</p>
                 </div>
-                <button
-                  type="button"
-                  className="w-full max-w-xs py-4 rounded-sm bg-white text-cr-teal-dark font-condensed font-bold text-lg uppercase tracking-widest hover:bg-white/90 transition-all shadow-md active:scale-95"
-                  onClick={handleReset}
-                >
-                  Nueva simulación
-                </button>
+                <img
+                  src={posicionLateralImg}
+                  alt="Posición lateral de seguridad"
+                  className="w-full max-w-[300px]"
+                  draggable={false}
+                />
               </motion.div>
             ) : (
               <div className="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-5 pt-4 pb-2 flex items-center justify-between gap-3 flex-wrap">
                   <h3 className="font-condensed font-bold uppercase tracking-wide text-cr-ink pb-2 border-b-2 border-cr-red inline-block">
-                    Elegí a quién asistir
+                    📌 Elegí a quién asistir
                   </h3>
                   <div className="flex gap-1.5">
                     {Object.entries(PATIENTS).map(([id, p]) => {
@@ -473,7 +510,7 @@ export function AEDSimulator() {
                   </div>
                 </div>
 
-                <div className="relative mx-auto w-full max-w-sm select-none">
+                <div className="relative mx-auto w-full max-w-[300px] select-none">
                   <img
                     src={patient.img}
                     alt={patient.alt}
@@ -576,6 +613,26 @@ export function AEDSimulator() {
             </div>
 
             {state.step === STEPS.SHOCK_ADVISED && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded border-l-4 border-cr-red border-y border-r border-slate-200 shadow-sm p-4"
+              >
+                <img
+                  src={deaImg}
+                  alt="Operador alertando que nadie toque a la víctima antes de la descarga"
+                  className="w-full max-w-[180px] mx-auto mb-3"
+                  draggable={false}
+                />
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  <strong className="text-cr-red">⚠️ Antes de la descarga:</strong> asegurate de
+                  que nadie esté tocando a la víctima. Si vos manejás el DEA, debés alertarlo en
+                  voz alta al resto de las personas.
+                </p>
+              </motion.div>
+            )}
+
+            {state.step === STEPS.SHOCK_ADVISED && (
               <motion.button
                 type="button"
                 className={`w-full py-6 rounded text-white font-condensed font-bold text-2xl uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 ${
@@ -603,7 +660,12 @@ export function AEDSimulator() {
                   {compressionCount}
                   <span className="text-2xl text-slate-400">/30</span>
                 </motion.div>
-                <Hand size={30} className="text-cr-teal animate-bounce mt-1" />
+                <img
+                  src={patient.cprImg}
+                  alt={`Técnica de compresiones en ${patient.label.toLowerCase()}`}
+                  className="w-full max-w-[180px] mt-1"
+                  draggable={false}
+                />
               </div>
             )}
 
@@ -627,6 +689,32 @@ export function AEDSimulator() {
             </button>
           </div>
         </div>
+
+        {/* Dónde encontrar un DEA */}
+        <section className="bg-white rounded border border-slate-200 shadow-sm p-5">
+          <h2 className="font-condensed font-bold uppercase tracking-wide text-cr-ink pb-2 mb-3 border-b-2 border-cr-red inline-block">
+            📌 ¿Dónde encuentro un DEA?
+          </h2>
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <p className="text-sm text-slate-600 leading-relaxed flex-1">
+              Podés encontrar un DEA en lugares como organismos públicos, estadios, clínicas,
+              aeropuertos, terminales de transportes, etc. Siempre están guardados en gabinetes de
+              emergencia señalizados con carteles, cerca de los matafuegos y elementos de
+              seguridad.
+            </p>
+            <figure className="shrink-0 text-center">
+              <img
+                src={aedSignImg}
+                alt="Cartel de señalización de un DEA, fondo verde con un corazón y un rayo"
+                className="w-32 mx-auto"
+                draggable={false}
+              />
+              <figcaption className="mt-2 text-[11px] text-slate-400 max-w-40">
+                El cartel puede decir AED (en inglés) o DEA.
+              </figcaption>
+            </figure>
+          </div>
+        </section>
       </main>
 
       {/* Shock discharge flash animation */}
