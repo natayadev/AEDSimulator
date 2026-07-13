@@ -59,7 +59,8 @@ const PATIENTS = {
     },
     cprImg: rcpInfanteImg,
     cprGuide: [
-      ['Manos', 'una sola mano en el centro del pecho.'],
+      ['Manos', 'una sola mano en el centro del pecho; la otra en la frente para sostener la cabeza.'],
+      ['Insuflaciones', 'realizá 2 insuflaciones de rescate (boca a boca), como si fueras a inflar un globo.'],
       ['Frecuencia', '100 a 120 por minuto.'],
       ['Ritmo', 'igual tiempo de compresión que de relajación.'],
     ],
@@ -81,7 +82,8 @@ const PATIENTS = {
     },
     cprImg: rcpBebeImg,
     cprGuide: [
-      ['Manos', 'dos dedos en el centro del pecho y una mano en la frente.'],
+      ['Manos', 'dos dedos en el centro del pecho y una mano en la frente para sostener la cabeza.'],
+      ['Insuflaciones', 'realizá 2 insuflaciones de rescate (boca a boca), como si soplaras una vela.'],
       ['Frecuencia', '100 a 120 por minuto.'],
       ['Ritmo', 'igual tiempo de compresión que de relajación.'],
     ],
@@ -95,6 +97,7 @@ export function AEDSimulator() {
   const [padsPlaced, setPadsPlaced] = useState(INITIAL_PADS_STATE)
   const [shakePad, setShakePad] = useState(null)
   const [shockFlash, setShockFlash] = useState(false)
+  const [postShockMessage, setPostShockMessage] = useState(null)
   const [compressionCount, setCompressionCount] = useState(1)
   const [patientId, setPatientId] = useState('adulto')
   const patient = PATIENTS[patientId]
@@ -102,7 +105,7 @@ export function AEDSimulator() {
   const rightDropRef = useRef(null)
   const audioContextRef = useRef(null)
 
-  const speak = useCallback((text) => {
+  const speak = useCallback((text, options = {}) => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return
 
     // Cancel any ongoing speech
@@ -112,6 +115,9 @@ export function AEDSimulator() {
     utterance.lang = 'es-ES'
     utterance.rate = 1.0
     utterance.pitch = 1.0
+    if (options.onEnd) {
+      utterance.onend = options.onEnd
+    }
     window.speechSynthesis.speak(utterance)
   }, [])
 
@@ -191,7 +197,6 @@ export function AEDSimulator() {
     if (state.step === STEPS.START) {
       setPadsPlaced(INITIAL_PADS_STATE)
       setShakePad(null)
-      dispatch('PLACE_PADS')
     }
   }, [state.step])
 
@@ -298,9 +303,11 @@ export function AEDSimulator() {
 
   const handleShockDelivered = () => {
     setShockFlash(true)
+    setPostShockMessage('Descarga administrada')
 
     setTimeout(() => {
       setShockFlash(false)
+      setPostShockMessage(null)
       dispatch('SHOCK_DELIVERED')
     }, 260)
   }
@@ -321,10 +328,10 @@ export function AEDSimulator() {
 
   const statusText = {
     [STEPS.OFF]: 'DEA apagado',
-    [STEPS.CALL_911]: '⚠️ Acción Requerida',
-    [STEPS.START]: 'Coloque parches',
+    [STEPS.CALL_911]: 'Activá el sistema de emergencias antes de continuar.',
+    [STEPS.START]: 'Quita la ropa del pecho de la persona.',
     [STEPS.PLACE_PADS]: 'Coloque parches',
-    [STEPS.ANALYZING]: 'Analizando ritmo...',
+    [STEPS.ANALYZING]: 'Evaluando la frecuencia cardiaca',
     [STEPS.SHOCK_ADVISED]: '¡Descarga recomendada!',
     [STEPS.CPR]: 'Inicie RCP por 2 minutos',
     [STEPS.RECOVERED]: 'Pulso detectado',
@@ -332,6 +339,11 @@ export function AEDSimulator() {
 
   // Effect for voice instructions
   useEffect(() => {
+    if (postShockMessage) {
+      speak(postShockMessage)
+      return
+    }
+
     if (!statusText[state.step] || state.step === STEPS.OFF) return
 
     const text =
@@ -339,8 +351,13 @@ export function AEDSimulator() {
         ? `${statusText[state.step]}. ${patient.recoveredMsg}`
         : statusText[state.step]
 
+    if (state.step === STEPS.START) {
+      speak(text, { onEnd: () => dispatch('PLACE_PADS') })
+      return
+    }
+
     speak(text)
-  }, [state.step, speak])
+  }, [postShockMessage, state.step, speak])
 
   const isRunning = state.step !== STEPS.OFF
 
@@ -382,14 +399,14 @@ export function AEDSimulator() {
           </p>
         </section>
 
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           {/* Panel izquierdo: Guía de RCP (bloque teal) */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
+          <div className="lg:col-span-3 flex flex-col gap-4 h-full">
             {state.step === STEPS.CPR ? (
               <motion.aside
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-cr-teal text-white rounded shadow-sm p-5"
+                className="bg-cr-teal text-white rounded shadow-sm p-5 h-full flex flex-col"
               >
                 <h3 className="font-condensed font-bold uppercase tracking-wide pb-2 mb-4 border-b-2 border-white/40">
                   📌 Compresiones: {patient.label}
@@ -397,7 +414,7 @@ export function AEDSimulator() {
                 <img
                   src={patient.cprImg}
                   alt={`Técnica de compresiones en ${patient.label.toLowerCase()}`}
-                  className="w-full mb-4"
+                  className="w-[58%] mx-auto mb-4"
                   draggable={false}
                 />
                 <ul className="text-sm space-y-3 leading-relaxed">
@@ -412,15 +429,14 @@ export function AEDSimulator() {
                 </p>
               </motion.aside>
             ) : (
-              <aside className="bg-white rounded border border-slate-200 shadow-sm p-5">
+              <aside className="bg-white rounded border border-slate-200 shadow-sm p-5 h-full flex flex-col">
                 <h3 className="font-condensed font-bold uppercase tracking-wide text-cr-ink pb-2 mb-4 border-b-2 border-cr-red inline-block">
                   📌 ¿Cómo funciona?
                 </h3>
                 <ol className="text-sm space-y-3 text-slate-600 leading-relaxed list-decimal list-inside">
                   <li>Verificá que {patient.noun} no responda y no respire.</li>
                   <li>Llamá a emergencias (107 / 911).</li>
-                  <li>Mientras alguien hace RCP, otro prepara el DEA.</li>
-                  <li>Encendé el DEA.</li>
+                  <li>Encendé el DEA: idealmente mientras alguien hace RCP, otro prepara el DEA.</li>
                   <li>Quitale la ropa del torso: el pecho debe quedar descubierto y seco.</li>
                   <li>Colocá los parches sobre {patient.noun}.</li>
                   <li>Seguí las indicaciones del equipo.</li>
@@ -430,12 +446,12 @@ export function AEDSimulator() {
           </div>
 
           {/* Área central: muñeco */}
-          <div className="lg:col-span-6 flex flex-col">
+          <div className="lg:col-span-6 flex flex-col h-full">
             {state.step === STEPS.CALL_911 ? (
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="bg-white rounded border border-slate-200 shadow-sm p-8 flex flex-col items-center justify-center text-center gap-6"
+                className="bg-white rounded border border-slate-200 shadow-sm p-8 flex flex-col items-center justify-center text-center gap-6 h-full"
               >
                 <div className="w-20 h-20 bg-cr-red/10 rounded-full flex items-center justify-center text-cr-red animate-pulse">
                   <PhoneCall size={36} />
@@ -460,7 +476,7 @@ export function AEDSimulator() {
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="bg-cr-teal text-white rounded shadow-sm p-8 flex flex-col items-center justify-center text-center gap-6"
+                className="bg-cr-teal text-white rounded shadow-sm p-8 flex flex-col items-center justify-center text-center gap-6 h-full"
               >
                 <motion.div
                   className="w-20 h-20 bg-white/15 rounded-full flex items-center justify-center"
@@ -483,7 +499,7 @@ export function AEDSimulator() {
                 />
               </motion.div>
             ) : (
-              <div className="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
+              <div className="bg-white rounded border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col">
                 <div className="px-5 pt-4 pb-2 flex items-center justify-between gap-3 flex-wrap">
                   <h3 className="font-condensed font-bold uppercase tracking-wide text-cr-ink pb-2 border-b-2 border-cr-red inline-block">
                     📌 Elegí a quién asistir
@@ -510,11 +526,11 @@ export function AEDSimulator() {
                   </div>
                 </div>
 
-                <div className="relative mx-auto w-full max-w-[300px] select-none">
+                <div className="relative mx-auto w-full max-w-[300px] select-none flex-1 flex items-center justify-center">
                   <img
                     src={patient.img}
                     alt={patient.alt}
-                    className="w-full pointer-events-none"
+                    className="w-full pointer-events-none my-4"
                     draggable={false}
                   />
 
@@ -540,6 +556,26 @@ export function AEDSimulator() {
                       )}
                     </div>
                   ))}
+
+                  {state.step === STEPS.SHOCK_ADVISED && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                      <motion.button
+                        type="button"
+                        className={`pointer-events-auto w-full max-w-[340px] py-6 rounded text-white font-condensed font-bold text-2xl uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 ${
+                          shockFlash ? 'bg-cr-red/60' : 'bg-cr-red'
+                        }`}
+                        animate={{
+                          scale: [1, 1.04, 1],
+                          filter: ['brightness(1)', 'brightness(1.4)', 'brightness(1)'],
+                        }}
+                        transition={{ duration: 0.5, repeat: Infinity }}
+                        onClick={handleShockDelivered}
+                      >
+                        <Zap size={26} />
+                        Shock
+                      </motion.button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Bandeja de parches */}
@@ -580,15 +616,16 @@ export function AEDSimulator() {
                     </div>
                   </div>
                 )}
+
               </div>
             )}
           </div>
 
           {/* Panel derecho: equipo DEA (monitor y controles) */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
+          <div className="lg:col-span-3 flex flex-col gap-4 h-full">
             <VisualDisplay
               step={state.step}
-              message={statusText[state.step]}
+              message={postShockMessage ?? statusText[state.step]}
               touchWarning={patient.touchWarning}
             />
 
@@ -621,7 +658,7 @@ export function AEDSimulator() {
                 <img
                   src={deaImg}
                   alt="Operador alertando que nadie toque a la víctima antes de la descarga"
-                  className="w-full max-w-[180px] mx-auto mb-3"
+                  className="w-[104px] mx-auto mb-3"
                   draggable={false}
                 />
                 <p className="text-xs text-slate-600 leading-relaxed">
@@ -630,21 +667,6 @@ export function AEDSimulator() {
                   voz alta al resto de las personas.
                 </p>
               </motion.div>
-            )}
-
-            {state.step === STEPS.SHOCK_ADVISED && (
-              <motion.button
-                type="button"
-                className={`w-full py-6 rounded text-white font-condensed font-bold text-2xl uppercase tracking-widest shadow-lg flex items-center justify-center gap-2 ${
-                  shockFlash ? 'bg-cr-red/60' : 'bg-cr-red'
-                }`}
-                animate={{ scale: [1, 1.04, 1], filter: ['brightness(1)', 'brightness(1.4)', 'brightness(1)'] }}
-                transition={{ duration: 0.5, repeat: Infinity }}
-                onClick={handleShockDelivered}
-              >
-                <Zap size={26} />
-                Shock
-              </motion.button>
             )}
 
             {state.step === STEPS.CPR && (
@@ -660,12 +682,6 @@ export function AEDSimulator() {
                   {compressionCount}
                   <span className="text-2xl text-slate-400">/30</span>
                 </motion.div>
-                <img
-                  src={patient.cprImg}
-                  alt={`Técnica de compresiones en ${patient.label.toLowerCase()}`}
-                  className="w-full max-w-[180px] mt-1"
-                  draggable={false}
-                />
               </div>
             )}
 
@@ -706,11 +722,11 @@ export function AEDSimulator() {
               <img
                 src={aedSignImg}
                 alt="Cartel de señalización de un DEA, fondo verde con un corazón y un rayo"
-                className="w-32 mx-auto"
+                  className="w-20 mx-auto"
                 draggable={false}
               />
               <figcaption className="mt-2 text-[11px] text-slate-400 max-w-40">
-                El cartel puede decir AED (en inglés) o DEA.
+                El cartel puede decir AED (en inglés) o DEA (en español).
               </figcaption>
             </figure>
           </div>
