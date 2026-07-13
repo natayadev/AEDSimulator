@@ -401,7 +401,7 @@ export function AEDSimulator() {
 
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           {/* Panel izquierdo: Guía de RCP (bloque teal) */}
-          <div className="lg:col-span-4 flex flex-col gap-4 h-full">
+          <div className="lg:col-span-3 flex flex-col gap-4 h-full">
             {state.step === STEPS.CPR ? (
               <motion.aside
                 initial={{ x: -20, opacity: 0 }}
@@ -622,7 +622,7 @@ export function AEDSimulator() {
           </div>
 
           {/* Panel derecho: equipo DEA (monitor y controles) */}
-          <div className="lg:col-span-4 flex flex-col gap-4 h-full">
+          <div className="lg:col-span-3 flex flex-col gap-4 h-full">
             <VisualDisplay
               step={state.step}
               message={postShockMessage ?? statusText[state.step]}
