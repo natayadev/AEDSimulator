@@ -13,6 +13,9 @@ The simulator walks through the real AED protocol as a state machine:
 - **Visual display** (`VisualDisplay.jsx`) showing device state, pad placement (drag-and-drop left/right pads), shock flash, and compression counter.
 - Animations powered by Framer Motion; icons from lucide-react.
 
+## Current UI
+
+
 ## Tech stack
 
 - React 19 + Vite 7
