@@ -446,7 +446,7 @@ export function AEDSimulator() {
           </div>
 
           {/* Área central: muñeco */}
-          <div className="lg:col-span-4 flex flex-col h-full">
+          <div className="lg:col-span-6 flex flex-col h-full">
             {state.step === STEPS.CALL_911 ? (
               <motion.div
                 initial={{ scale: 0.95, opacity: 0 }}
@@ -716,19 +716,14 @@ export function AEDSimulator() {
               Podés encontrar un DEA en lugares como organismos públicos, estadios, clínicas,
               aeropuertos, terminales de transportes, etc. Siempre están guardados en gabinetes de
               emergencia señalizados con carteles, cerca de los matafuegos y elementos de
-              seguridad.
+              seguridad. El cartel puede decir AED (en inglés) o DEA (en español).
             </p>
-            <figure className="shrink-0 text-center">
-              <img
-                src={aedSignImg}
-                alt="Cartel de señalización de un DEA, fondo verde con un corazón y un rayo"
-                  className="w-20 mx-auto"
-                draggable={false}
-              />
-              <figcaption className="mt-2 text-[11px] text-slate-400 max-w-40">
-                El cartel puede decir AED (en inglés) o DEA (en español).
-              </figcaption>
-            </figure>
+            <img
+              src={aedSignImg}
+              alt="Cartel de señalización de un DEA, fondo verde con un corazón y un rayo"
+              className="w-20 shrink-0"
+              draggable={false}
+            />
           </div>
         </section>
       </main>
