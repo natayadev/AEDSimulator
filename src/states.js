@@ -15,6 +15,18 @@ export const SHOCKS_TO_RECOVER = 2
 
 export const INITIAL_STATE = { step: STEPS.OFF, shocks: 0 }
 
+// Mensaje que muestra el monitor (y lee la voz) en cada paso
+export const STATUS_TEXT = {
+  [STEPS.OFF]: 'DEA apagado',
+  [STEPS.CALL_911]: 'Activá el sistema de emergencias antes de continuar.',
+  [STEPS.START]: 'Quita la ropa del pecho de la persona.',
+  [STEPS.PLACE_PADS]: 'Coloque parches',
+  [STEPS.ANALYZING]: 'Evaluando la frecuencia cardiaca',
+  [STEPS.SHOCK_ADVISED]: '¡Descarga recomendada!',
+  [STEPS.CPR]: 'Inicie RCP por 2 minutos',
+  [STEPS.RECOVERED]: 'Pulso detectado',
+}
+
 function getActionType(action) {
   if (typeof action === 'string') {
     return action

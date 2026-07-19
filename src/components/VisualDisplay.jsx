@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Activity } from 'lucide-react'
-import { STEPS } from './states'
+import { STEPS } from '../states'
 
 function EcgWave() {
   return (
@@ -42,7 +42,7 @@ export default function VisualDisplay({ step, message, touchWarning = 'No tocar'
           }`}
         />
       </div>
-      <div className="bg-[#101418] text-green-400 px-4 py-3 font-mono min-h-20 flex flex-col justify-center gap-1.5">
+      <div className="bg-cr-screen text-green-400 px-4 py-3 font-mono min-h-20 flex flex-col justify-center gap-1.5">
         <p className={`text-base sm:text-lg ${isOff ? 'text-green-400/40' : ''}`}>{message}</p>
         {step === STEPS.ANALYZING && (
           <>

@@ -5,12 +5,13 @@ export default {
     extend: {
       colors: {
         cr: {
-          red: '#E4251B',
-          'red-dark': '#C01E15',
-          teal: '#4CA5A3',
-          'teal-dark': '#3E8D8B',
-          ink: '#3A3A3A',
-          paper: '#F5F5F5',
+          red: 'rgb(var(--cr-red) / <alpha-value>)',
+          'red-dark': 'rgb(var(--cr-red-dark) / <alpha-value>)',
+          teal: 'rgb(var(--cr-teal) / <alpha-value>)',
+          'teal-dark': 'rgb(var(--cr-teal-dark) / <alpha-value>)',
+          ink: 'rgb(var(--cr-ink) / <alpha-value>)',
+          paper: 'rgb(var(--cr-paper) / <alpha-value>)',
+          screen: 'rgb(var(--cr-screen) / <alpha-value>)',
         },
       },
       fontFamily: {

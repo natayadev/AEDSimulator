@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Paleta institucional — canales RGB para poder usar modificadores de opacidad (ej: bg-cr-red/50) */
+  --cr-red: 228 37 27; /* #E4251B */
+  --cr-red-dark: 192 30 21; /* #C01E15 */
+  --cr-teal: 76 165 163; /* #4CA5A3 */
+  --cr-teal-dark: 62 141 139; /* #3E8D8B */
+  --cr-ink: 58 58 58; /* #3A3A3A */
+  --cr-paper: 245 245 245; /* #F5F5F5 */
+  --cr-screen: 16 20 24; /* #101418 — pantalla del monitor */
+}
+
 body {
   @apply bg-cr-paper text-cr-ink font-sans antialiased;
 }
